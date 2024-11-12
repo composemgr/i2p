@@ -1,45 +1,47 @@
-name: i2p
+name: i2pd
 services:
-  daemon:
+  i2pd:
     image: purplei2p/i2pd:latest
+    container_name: i2pd
     network_mode: host
-    volumes:
-      - daemon_state:/home/i2pd/data # where to save i2pd data
-      - /var/lib/srv/root/docker/purplei2p/i2pd/latest/rootfs/config/i2p/i2pd.conf:/home/i2pd/data/i2pd.conf
-    ports:
-      - "4444:4444" # http proxy
-      - "4447:4447" # socks proxy
-      - "7070:7070" # web ui
-      - "12345:12345" # port for incoming connections. Should be set in i2pd.conf file
-      - "12345:12345/udp" # udp port for incoming connections. Should be set in i2pd.conf file
     restart: "always"
+    volumes:
+      - server:/home/i2pd/data # where to save i2pd data
+      - /var/lib/srv/root/docker/purplei2p/i2pd/latest/rootfs/config/i2p/i2pd.conf:/home/i2pd/data/i2pd.conf
+#    ports:
+#      - "4444:4444" # http proxy
+#      - "4447:4447" # socks proxy
+#      - "12345:12345" # port for incoming connections. Should be set in i2pd.conf file
+#      - "12345:12345/udp" # udp port for incoming connections. Should be set in i2pd.conf file
+#      - "172.17.0.1:7070:7070" # web ui
     ulimits:
       nofile:
         soft: 30000
         hard: 40000
   snark:
     image: ypopovych/i2psnark:latest
-    depends_on:
-      - daemon
-    volumes:
-      - snark_state:/snark/config
-      - /path/to/host/downloads:/snark/downloads
-    networks:
-      - i2p
-    ports:
-      - "8002:8002" # web ui
-    environment:
-      HOSTNAMES: "" # add your hostnames/IPs if you use it from network (not a localhost)
-      I2CP_HOST: 172.17.0.1 # name of "daemon" container
+    container_name: i2pd-snark
     restart: "always"
+    depends_on:
+      - i2pd
+    volumes:
+      - snark:/snark/config
+      - /var/lib/srv/root/docker/purplei2p/i2pd/latest/rootfs/data/downloads:/snark/downloads
+    networks:
+      - i2pd
+    ports:
+      - "172.17.0.1:7071:8002" # web ui
+    environment:
+      HOSTNAMES: "172.17.0.1" # add your hostnames/IPs if you use it from network (not a localhost)
+      I2CP_HOST: 172.17.0.1 # name of "daemon" container
 
 networks:
-  i2p:
-    name: i2p
+  i2pd:
+    name: i2pd
     external: false
 
 volumes:
-  snark_state:
-  daemon_state:
+  snark:
+  server:
 
 # https://github.com/PurpleI2P/i2pd/blob/openssl/contrib/i2pd.conf
