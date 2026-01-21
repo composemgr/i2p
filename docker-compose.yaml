@@ -1,0 +1,47 @@
+# nginx proxy address - http://172.17.0.1:7657
+
+name: i2p
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: 'geti2p/i2p:latest'
+    container_name: i2p-app
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    user: root
+    environment:
+      TZ: ${TZ:-America/New_York}
+      JVM_XMX: 1024m
+      EXT_PORT: 54321
+      IP_ADDR: 0.0.0.0
+    ports:
+      - '4444:4444'
+      - '4445:4445'
+      - '6668:6668'
+      - '7654:7654'
+      - '7656:7656'
+      - '7658:7658'
+      - '7659:7659'
+      - '7660:7660'
+      - '7652:7652'
+      - '7653:7653'
+      - '54321:12345'
+      - '54321:12345/udp'
+      - '172.17.0.1:7657:7657'
+    volumes:
+      - './rootfs/data/i2p:/i2p/.i2p'
+      - './rootfs/data/downloads:/i2psnark'
+    networks:
+      - i2p
+
+networks:
+  i2p:
+    name: i2p
+    external: false
