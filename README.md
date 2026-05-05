@@ -45,8 +45,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/i2p` - Data storage
-- `./rootfs/data/downloads` - Data storage
+- `./volumes/data/i2p` - Data storage
+- `./volumes/data/downloads` - Data storage
 
 ## 🔍 Logging
 
