@@ -36,8 +36,8 @@ services:
       - '54321:12345/udp'
       - '172.17.0.1:7657:7657'
     volumes:
-      - './rootfs/data/i2p:/i2p/.i2p'
-      - './rootfs/data/downloads:/i2psnark'
+      - './volumes/data/i2p:/i2p/.i2p'
+      - './volumes/data/downloads:/i2psnark'
     networks:
       - i2p
 
