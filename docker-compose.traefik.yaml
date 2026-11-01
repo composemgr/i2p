@@ -1,0 +1,45 @@
+name: i2p
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: geti2p/i2p:latest
+    container_name: i2p-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: i2p-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+    volumes:
+      - './volumes/config/i2p:/i2p/.i2p:z'
+      - './volumes/data/i2p:/i2psnark:z'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.i2p-app.entrypoints=http'
+      - 'traefik.http.routers.i2p-app.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.middlewares.i2p-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.i2p-app.middlewares=i2p-app-https-redirect'
+      - 'traefik.http.routers.i2p-app-secure.entrypoints=https'
+      - 'traefik.http.routers.i2p-app-secure.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.i2p-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.i2p-app-secure.service=i2p-app'
+      - 'traefik.http.services.i2p-app.loadbalancer.server.port=7657'
+    networks:
+      - i2p
+      - traefik
+
+networks:
+  i2p:
+    name: i2p
+    external: false
+  traefik:
+    external: true

@@ -1,0 +1,37 @@
+name: i2p
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: geti2p/i2p:latest
+    container_name: i2p-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: i2p-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+    volumes:
+      - './volumes/config/i2p:/i2p/.i2p:z'
+      - './volumes/data/i2p:/i2psnark:z'
+    labels:
+      - 'cloudflare.enable=true'
+      - 'cloudflare.service=http://i2p-app:7657'
+      - 'cloudflare.hostname=${BASE_HOST_NAME:-$HOSTNAME}'
+    networks:
+      - i2p
+      - cloudflare
+
+networks:
+  i2p:
+    name: i2p
+    external: false
+  cloudflare:
+    external: true

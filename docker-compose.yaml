@@ -1,4 +1,4 @@
-# nginx proxy address - http://172.17.0.1:7657
+# nginx proxy address - http://172.17.0.1:64204
 
 name: i2p
 x-logging: &default-logging
@@ -9,63 +9,26 @@ x-logging: &default-logging
 
 services:
   app:
-    image: 'geti2p/i2p:latest'
+    image: geti2p/i2p:latest
     container_name: i2p-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
     hostname: ${BASE_HOST_NAME:-$HOSTNAME}
     restart: always
     pull_policy: always
     logging: *default-logging
-    user: root
     environment:
       TZ: ${TZ:-America/New_York}
-      JVM_XMX: 1024m
-      EXT_PORT: 54321
-      IP_ADDR: 0.0.0.0
       CONTAINER_NAME: i2p-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     ports:
-      - '4444:4444'
-      - '4445:4445'
-      - '6668:6668'
-      - '7654:7654'
-      - '7656:7656'
-      - '7658:7658'
-      - '7659:7659'
-      - '7660:7660'
-      - '7652:7652'
-      - '7653:7653'
-      - '54321:12345'
-      - '54321:12345/udp'
-      - '172.17.0.1:7657:7657'
+      - '172.17.0.1:64204:7657'
     volumes:
-      - './volumes/data/i2p:/i2p/.i2p'
-      - './volumes/data/downloads:/i2psnark'
+      - './volumes/config/i2p:/i2p/.i2p:z'
+      - './volumes/data/i2p:/i2psnark:z'
     networks:
       - i2p
-      - proxy
-      - cloudflare
-    labels:
-      - 'traefik.enable=true'
-      - 'cloudflare.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'cloudflare.service=http://i2p-app:7657'
-      - 'cloudflare.hostname=i2p.${CLOUDFLARE_ZONE_NAME:-}'
-      - 'traefik.http.routers.i2p-app.entrypoints=http'
-      - 'traefik.http.routers.i2p-app-secure.tls=true'
-      - 'traefik.http.routers.i2p-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.middlewares.i2p-app-https-redirect.redirectscheme.scheme=https'
-      - 'traefik.http.routers.i2p-app.middlewares=i2p-app-https-redirect'
-      - 'traefik.http.routers.i2p-app-secure.entrypoints=https'
-      - 'traefik.http.routers.i2p-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.routers.i2p-app-secure.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.i2p-app-secure.service=i2p-app'
-      - 'traefik.http.services.i2p-app.loadbalancer.server.port=7657'
 
 networks:
   i2p:
     name: i2p
     external: false
-  proxy:
-    external: true
-  cloudflare:
-    external: true
