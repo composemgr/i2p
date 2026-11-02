@@ -88,6 +88,8 @@ Only the router console (7657) is published. The router's inbound peer transport
 port (shown in the console) is not published here. Add a mapping and forward it
 on your firewall if you want to accept inbound peer traffic.
 
+Non-HTTP protocol ports are published identically in all three compose variants, because they cannot be proxied over HTTP: `4444`, `4445`, `6668`, `7654`, `7656`, `12345` (I2P proxies and bridges).
+
 ## 📂 Volumes
 
 - `./volumes/config/i2p` - Router configuration, profile, keys, and reseed data
